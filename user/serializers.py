@@ -5,8 +5,8 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CustomAuthTokenSerializer(AuthTokenSerializer):
+    email = serializers.EmailField(label=_("Email"), write_only=True)
     username = None
-    email = serializers.CharField(label=_("Email"), write_only=True)
 
     def validate(self, attrs):
         email = attrs.get("email")
@@ -14,12 +14,9 @@ class CustomAuthTokenSerializer(AuthTokenSerializer):
 
         if email and password:
             user = authenticate(
-                request=self.context.get("request"), username=email, password=password
+                request=self.context.get("request"), email=email, password=password
             )
 
-            # The authenticate call simply returns None for is_active=False
-            # users. (Assuming the default ModelBackend authentication
-            # backend.)
             if not user:
                 msg = _("Unable to log in with provided credentials.")
                 raise serializers.ValidationError(msg, code="authorization")
