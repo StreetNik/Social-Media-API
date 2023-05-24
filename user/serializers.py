@@ -37,3 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return get_user_model().objects.create_user(**validated_data)
+
+
+class LogOutSerializer(serializers.Serializer):
+    email = serializers.EmailField(read_only=True)
