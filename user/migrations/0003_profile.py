@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "profile_picture",
-                    models.ImageField(upload_to=user.models.profile_image_file_path),
+                    models.ImageField(upload_to=user.models.profile_picture_file_path),
                 ),
                 ("bio", models.CharField(max_length=255)),
                 (

@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -47,8 +48,8 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
 
-def profile_image_file_path(instance, filename: str):
-    email = instance.email.split("@")[0]
+def profile_picture_file_path(instance, filename: str):
+    email = instance.user.email.split("@")[0]
     directory = email[0]
     _, extension = os.path.splitext(filename)
 
@@ -73,8 +74,13 @@ SEX_LIST = (
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile_picture = models.ImageField(upload_to=profile_image_file_path)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        blank=False,
+        related_name="profile",
+    )
+    profile_picture = models.ImageField(upload_to=profile_picture_file_path)
     bio = models.CharField(max_length=255)
     marriage_status = models.CharField(
         max_length=255, choices=MARRIAGE_STATUSES, default="none"
@@ -83,3 +89,6 @@ class Profile(models.Model):
 
     followers = models.ManyToManyField(User, related_name="following", blank=True)
     following = models.ManyToManyField(User, related_name="followers", blank=True)
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
