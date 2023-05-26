@@ -80,8 +80,8 @@ class Profile(models.Model):
         blank=False,
         related_name="profile",
     )
-    profile_picture = models.ImageField(upload_to=profile_picture_file_path)
-    bio = models.CharField(max_length=255)
+    profile_picture = models.ImageField(upload_to=profile_picture_file_path, blank=True)
+    bio = models.CharField(max_length=255, blank=True)
     marriage_status = models.CharField(
         max_length=255, choices=MARRIAGE_STATUSES, default="none"
     )

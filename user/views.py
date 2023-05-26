@@ -1,11 +1,10 @@
-from rest_framework import generics, authentication, permissions
+from rest_framework import generics, authentication, permissions, status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
-from rest_framework.views import APIView
 
-from user.models import User
+from user.models import User, Profile
 from user.serializers import (
     UserSerializer,
     CustomAuthTokenSerializer,
@@ -21,6 +20,17 @@ class CreateTokenView(ObtainAuthToken):
 
 class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        user = serializer.instance
+
+        user_profile = Profile.objects.create(user=user)
+        user_profile.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class LogOutView(generics.RetrieveAPIView):
