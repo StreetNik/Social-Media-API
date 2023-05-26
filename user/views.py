@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from rest_framework import generics, authentication, permissions, status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
@@ -10,27 +12,13 @@ from user.serializers import (
     CustomAuthTokenSerializer,
     LogOutSerializer,
     UserDetailSerializer,
+    UserListSerializer,
 )
 
 
 class CreateTokenView(ObtainAuthToken):
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
     serializer_class = CustomAuthTokenSerializer
-
-
-class CreateUserView(generics.CreateAPIView):
-    serializer_class = UserSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        user = serializer.instance
-
-        user_profile = Profile.objects.create(user=user)
-        user_profile.save()
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class LogOutView(generics.RetrieveAPIView):
@@ -49,6 +37,26 @@ class LogOutView(generics.RetrieveAPIView):
         user = self.get_user()
         serializer = LogOutSerializer(user)
         return Response(serializer.data)
+
+
+class CreateUserView(generics.CreateAPIView):
+    serializer_class = UserSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        user = serializer.instance
+
+        user_profile = Profile.objects.create(user=user)
+        user_profile.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UsersListView(generics.ListAPIView):
+    serializer_class = UserListSerializer
+    queryset = get_user_model().objects.all()
 
 
 class UserProfileView(generics.RetrieveAPIView):

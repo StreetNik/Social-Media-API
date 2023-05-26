@@ -90,5 +90,11 @@ class Profile(models.Model):
     followers = models.ManyToManyField(User, related_name="following", blank=True)
     following = models.ManyToManyField(User, related_name="followers", blank=True)
 
-    def __str__(self):
+    def get_followers_count(self) -> int:
+        return self.followers.count()
+
+    def get_following_count(self) -> int:
+        return self.following.count()
+
+    def __str__(self) -> str:
         return f"{self.user.first_name} {self.user.last_name}"

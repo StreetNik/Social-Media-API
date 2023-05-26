@@ -39,6 +39,35 @@ class UserSerializer(serializers.ModelSerializer):
         return get_user_model().objects.create_user(**validated_data)
 
 
+class UserListSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.ImageField(source="profile.profile_picture")
+    bio = serializers.CharField(source="profile.bio")
+    followers_count = serializers.SerializerMethodField(
+        method_name="get_followers_count"
+    )
+    following_count = serializers.SerializerMethodField(
+        method_name="get_following_count"
+    )
+
+    class Meta:
+        model = get_user_model()
+        fields = [
+            "id",
+            "profile_picture",
+            "first_name",
+            "last_name",
+            "bio",
+            "followers_count",
+            "following_count",
+        ]
+
+    def get_followers_count(self, obj):
+        return obj.profile.get_followers_count()
+
+    def get_following_count(self, obj):
+        return obj.profile.get_following_count()
+
+
 class UserShortInfoSerializer(serializers.ModelSerializer):
     profile_picture = serializers.ImageField(source="profile.profile_picture")
 
