@@ -1,8 +1,7 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import generics, authentication, permissions, status
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
@@ -11,8 +10,9 @@ from user.serializers import (
     UserSerializer,
     CustomAuthTokenSerializer,
     LogOutSerializer,
-    UserDetailSerializer,
+    UserDetailPrivateSerializer,
     UserListSerializer,
+    UserDetailPublicSerializer,
 )
 
 
@@ -59,8 +59,8 @@ class UsersListView(generics.ListAPIView):
     queryset = get_user_model().objects.all()
 
 
-class UserProfileView(generics.RetrieveAPIView):
-    serializer_class = UserDetailSerializer
+class UserPrivateProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserDetailPrivateSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
@@ -70,4 +70,18 @@ class UserProfileView(generics.RetrieveAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["profile"] = self.request.user.profile
+        return context
+
+
+class UserPublicProfileView(generics.RetrieveAPIView):
+    serializer_class = UserDetailPublicSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        user = User.objects.get(pk=self.kwargs["pk"])
+        return user
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["profile"] = self.get_object().profile
         return context
