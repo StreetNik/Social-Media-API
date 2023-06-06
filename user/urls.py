@@ -6,16 +6,18 @@ from user.views import (
     CreateUserView,
     CreateTokenView,
     LogOutView,
-    UserProfileView,
+    UserPrivateProfileView,
     UsersListView,
+    UserPublicProfileView,
 )
 
 urlpatterns = [
     path("register/", CreateUserView.as_view(), name="register"),
     path("token/", CreateTokenView.as_view(), name="token"),
     path("logout/", LogOutView.as_view(), name="logout"),
-    path("profile/", UserProfileView.as_view(), name="profile"),
-    path("users-list/", UsersListView.as_view()),
+    path("profile/", UserPrivateProfileView.as_view(), name="profile"),
+    path("users-list/", UsersListView.as_view(), name="user-list"),
+    path("users-list/<int:pk>/", UserPublicProfileView.as_view(), name="user-info"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 app_name = "user"

@@ -76,7 +76,7 @@ class UserShortInfoSerializer(serializers.ModelSerializer):
         fields = ["id", "profile_picture", "first_name", "last_name"]
 
 
-class UserDetailSerializer(serializers.ModelSerializer):
+class UserDetailPrivateSerializer(serializers.ModelSerializer):
     sex = serializers.CharField(source="profile.sex")
     profile_picture = serializers.ImageField(source="profile.profile_picture")
     bio = serializers.CharField(source="profile.bio")
@@ -101,6 +101,31 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "following",
         ]
         read_only_fields = ["id", "followers", "following"]
+
+
+class UserDetailPublicSerializer(serializers.ModelSerializer):
+    sex = serializers.CharField(source="profile.sex")
+    profile_picture = serializers.ImageField(source="profile.profile_picture")
+    bio = serializers.CharField(source="profile.bio")
+    followers = UserShortInfoSerializer(
+        source="profile.followers", many=True, read_only=True
+    )
+    following = UserShortInfoSerializer(
+        source="profile.followers", many=True, read_only=True
+    )
+
+    class Meta:
+        model = get_user_model()
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "profile_picture",
+            "sex",
+            "bio",
+            "followers",
+            "following",
+        ]
 
 
 class LogOutSerializer(serializers.Serializer):
