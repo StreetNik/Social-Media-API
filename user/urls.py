@@ -9,6 +9,7 @@ from user.views import (
     UserPrivateProfileView,
     UsersListView,
     UserPublicProfileView,
+    FollowToggleAPIView,
 )
 
 urlpatterns = [
@@ -18,6 +19,11 @@ urlpatterns = [
     path("profile/", UserPrivateProfileView.as_view(), name="profile"),
     path("users-list/", UsersListView.as_view(), name="user-list"),
     path("users-list/<int:pk>/", UserPublicProfileView.as_view(), name="user-info"),
+    path(
+        "users-list/<int:pk>/follow_toggle/",
+        FollowToggleAPIView.as_view(),
+        name="user-follow-toggle",
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 app_name = "user"

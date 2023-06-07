@@ -104,15 +104,18 @@ class UserDetailPrivateSerializer(serializers.ModelSerializer):
 
 
 class UserDetailPublicSerializer(serializers.ModelSerializer):
-    sex = serializers.CharField(source="profile.sex")
-    profile_picture = serializers.ImageField(source="profile.profile_picture")
-    bio = serializers.CharField(source="profile.bio")
+    sex = serializers.CharField(source="profile.sex", read_only=True)
+    profile_picture = serializers.ImageField(
+        source="profile.profile_picture", read_only=True
+    )
+    bio = serializers.CharField(source="profile.bio", read_only=True)
     followers = UserShortInfoSerializer(
         source="profile.followers", many=True, read_only=True
     )
     following = UserShortInfoSerializer(
-        source="profile.followers", many=True, read_only=True
+        source="profile.following", many=True, read_only=True
     )
+    is_following = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
@@ -125,7 +128,21 @@ class UserDetailPublicSerializer(serializers.ModelSerializer):
             "bio",
             "followers",
             "following",
+            "is_following",
         ]
+
+    def get_is_following(self, obj):
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            return obj.profile.followers.filter(id=request.user.id).exists()
+        return False
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            data["is_following"] = self.get_is_following(instance)
+        return data
 
 
 class LogOutSerializer(serializers.Serializer):

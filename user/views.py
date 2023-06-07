@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+
 from rest_framework import generics, authentication, permissions, status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from rest_framework.views import APIView
 
 from user.models import User, Profile
 from user.serializers import (
@@ -85,3 +88,57 @@ class UserPublicProfileView(generics.RetrieveAPIView):
         context = super().get_serializer_context()
         context["profile"] = self.get_object().profile
         return context
+
+
+class FollowToggleAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        user_to_follow = get_object_or_404(Profile, user_id=pk)
+
+        user_profile = get_object_or_404(Profile, user=request.user)
+
+        user = request.user
+        if user in user_to_follow.followers.all():
+            print(user_to_follow.followers.count())
+            print(user_to_follow.following.count())
+            user_to_follow.followers.remove(user)
+            user_to_follow.save()
+            print(user_to_follow.followers.count())
+            print(user_to_follow.following.count())
+
+            user_profile.following.remove(user_to_follow.user)
+            user_profile.save()
+
+            return Response(
+                {"message": "User unfollowed successfully"}, status=status.HTTP_200_OK
+            )
+
+        user_to_follow.followers.add(user_profile.user)
+        user_profile.save()
+
+        return Response(
+            {"message": "User followed successfully"}, status=status.HTTP_200_OK
+        )
+
+
+# class FollowToggleAPIView(APIView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def post(self, request, pk):
+#         user_to_follow = get_object_or_404(Profile, id=pk)
+#
+#         user = request.user
+#
+#         if user in user_to_follow.followers.all():
+#             user_to_follow.followers.remove(user)
+#             user_to_follow.save()
+#             return Response(
+#                 {"message": "User unfollowed successfully"}, status=status.HTTP_200_OK
+#             )
+#         else:
+#             user_to_follow.followers.add(user)
+#             user_to_follow.save()
+#             return Response(
+#                 {"message": "User followed successfully"}, status=status.HTTP_200_OK
+#             )
