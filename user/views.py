@@ -63,13 +63,10 @@ class UsersListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = get_user_model().objects.select_related("profile")
 
-        username = self.request.query_params.get("username")
         sex = self.request.query_params.get("sex")
         first_name = self.request.query_params.get("first_name")
         last_name = self.request.query_params.get("last_name")
 
-        if username:
-            return queryset.filter(username__icontains=username)
         if sex:
             return queryset.filter(profile__sex=sex)
         if first_name:
