@@ -59,7 +59,25 @@ class CreateUserView(generics.CreateAPIView):
 
 class UsersListView(generics.ListAPIView):
     serializer_class = UserListSerializer
-    queryset = get_user_model().objects.all()
+
+    def get_queryset(self):
+        queryset = get_user_model().objects.select_related("profile")
+
+        username = self.request.query_params.get("username")
+        sex = self.request.query_params.get("sex")
+        first_name = self.request.query_params.get("first_name")
+        last_name = self.request.query_params.get("last_name")
+
+        if username:
+            return queryset.filter(username__icontains=username)
+        if sex:
+            return queryset.filter(profile__sex=sex)
+        if first_name:
+            return queryset.filter(first_name__icontains=first_name)
+        if last_name:
+            return queryset.filter(last_name__icontains=last_name)
+
+        return queryset
 
 
 class UserPrivateProfileView(generics.RetrieveUpdateAPIView):

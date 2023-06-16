@@ -48,6 +48,7 @@ class UserListSerializer(serializers.ModelSerializer):
     following_count = serializers.SerializerMethodField(
         method_name="get_following_count"
     )
+    sex = serializers.CharField(source="profile.sex")
 
     class Meta:
         model = get_user_model()
@@ -59,6 +60,7 @@ class UserListSerializer(serializers.ModelSerializer):
             "bio",
             "followers_count",
             "following_count",
+            "sex",
         ]
 
     def get_followers_count(self, obj):
