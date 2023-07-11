@@ -34,3 +34,9 @@ def profile_picture_file_path(instance, filename: str):
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(upload_to=profile_picture_file_path, blank=True)
+
+
+class PostComment(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="comments")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    content = models.CharField(max_length=400)
