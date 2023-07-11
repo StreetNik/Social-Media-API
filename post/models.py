@@ -40,3 +40,4 @@ class PostComment(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="comments")
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     content = models.CharField(max_length=400)
+    created_at = models.DateTimeField(auto_now=True)
