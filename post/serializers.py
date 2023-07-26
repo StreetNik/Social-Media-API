@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from post.models import Post, PostImage
+from post.models import Post, PostImage, PostComment
 
 
 class PostImageSerializer(serializers.ModelSerializer):
@@ -92,3 +92,10 @@ class PostDetailSerializer(serializers.ModelSerializer):
                 new_post_images.save()
 
         return instance
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostComment
+        fields = ["id", "user", "post", "content", "created_at"]
+        read_only_fields = ("created_at", "user", "post", "id")
