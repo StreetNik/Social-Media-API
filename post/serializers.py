@@ -1,6 +1,8 @@
+import re
+
 from rest_framework import serializers
 
-from post.models import Post, PostImage, PostComment
+from post.models import Post, PostImage, PostComment, HashTag
 
 
 class PostImageSerializer(serializers.ModelSerializer):
@@ -33,20 +35,35 @@ class PostListSerializer(serializers.ModelSerializer):
             "uploaded_images",
             "created_at",
             "likes_count",
+            "hash_tags",
         ]
         read_only_fields = ["user"]
 
     def get_likes_count(self, obj):
         return obj.people_who_liked.count()
 
+    def get_hash_tags(self, string):
+        hashtag_pattern = r'#\w+'
+        hashtags = re.findall(hashtag_pattern, string)
+
+        return hashtags
+
     def create(self, validated_data):
         uploaded_images = validated_data.pop("uploaded_images", None)
         user = self.context["request"].user
         post = Post.objects.create(user=user, **validated_data)
+        hash_tags = self.get_hash_tags(post.content)
         if uploaded_images:
             for image in uploaded_images:
                 new_post_images = PostImage.objects.create(image=image, post=post)
                 new_post_images.save()
+
+        # for hashtag in hash_tags:
+        #     new_hash_tag, created = HashTag.objects.get_or_create(name=hashtag)
+        #     post.hash_tags.add(new_hash_tag)
+
+        hash_set = (HashTag.objects.get_or_create(name=hash_tag)[0] for hash_tag in hash_tags)
+        post.hash_tags.set(hash_set)
 
         return post
 
