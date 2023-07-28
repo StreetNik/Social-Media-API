@@ -18,7 +18,7 @@ class Post(models.Model):
     content = models.CharField(max_length=500)
     created_at = models.DateTimeField(auto_now=True)
     people_who_liked = models.ManyToManyField(get_user_model(), related_name="likes")
-    hash_tags = models.ManyToManyField(HashTag, related_name="hash_tags")
+    hash_tags = models.ManyToManyField(HashTag, related_name="hash_tags", blank=True)
 
     def __str__(self):
         return (
