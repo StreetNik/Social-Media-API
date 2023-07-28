@@ -6,6 +6,10 @@ from django.db import models
 from django.utils.text import slugify
 
 
+class HashTag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+
 class Post(models.Model):
     user = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, related_name="posts"
@@ -14,6 +18,7 @@ class Post(models.Model):
     content = models.CharField(max_length=500)
     created_at = models.DateTimeField(auto_now=True)
     people_who_liked = models.ManyToManyField(get_user_model(), related_name="likes")
+    hash_tags = models.ManyToManyField(HashTag, related_name="hash_tags")
 
     def __str__(self):
         return (
