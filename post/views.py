@@ -12,12 +12,15 @@ class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
 
     def get_queryset(self):
-        following_only = self.request.GET.get("following-only", None)
+        filter = self.request.GET.get("filter", "all")
         user = self.request.user
 
-        if following_only == "True" and user.is_authenticated:
+        if filter == "following" and user.is_authenticated:
             following_users = user.profile.following.all()
             return Post.objects.filter(user__in=following_users)
+
+        if filter == "mine":
+            return Post.objects.filter(user=user.id)
 
         return Post.objects.all()
 
