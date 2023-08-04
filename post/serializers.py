@@ -11,11 +11,18 @@ class PostImageSerializer(serializers.ModelSerializer):
         fields = ["id", "post", "image"]
 
 
+class HashTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HashTag
+        fields = ["id", "name"]
+
+
 class PostListSerializer(serializers.ModelSerializer):
     likes_count = serializers.SerializerMethodField(
         method_name="get_likes_count", read_only=True
     )
     images = PostImageSerializer(many=True, read_only=True)
+    hash_tags = HashTagSerializer(many=True, read_only=True)
     uploaded_images = serializers.ListField(
         child=serializers.ImageField(
             max_length=10000, allow_empty_file=False, use_url=False
@@ -42,7 +49,7 @@ class PostListSerializer(serializers.ModelSerializer):
     def get_likes_count(self, obj):
         return obj.people_who_liked.count()
 
-    def get_hash_tags(self, string):
+    def find_hashtags_in_text(self, string):
         hashtag_pattern = r'#\w+'
         hashtags = re.findall(hashtag_pattern, string)
 
@@ -51,19 +58,18 @@ class PostListSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         uploaded_images = validated_data.pop("uploaded_images", None)
         user = self.context["request"].user
+        validated_data.pop("hash_tags", None)
         post = Post.objects.create(user=user, **validated_data)
-        hash_tags = self.get_hash_tags(post.content)
+        hash_tags = self.find_hashtags_in_text(post.content)
+
         if uploaded_images:
             for image in uploaded_images:
                 new_post_images = PostImage.objects.create(image=image, post=post)
                 new_post_images.save()
 
-        # for hashtag in hash_tags:
-        #     new_hash_tag, created = HashTag.objects.get_or_create(name=hashtag)
-        #     post.hash_tags.add(new_hash_tag)
-
-        hash_set = (HashTag.objects.get_or_create(name=hash_tag)[0] for hash_tag in hash_tags)
-        post.hash_tags.set(hash_set)
+        for hashtag in hash_tags:
+            new_hash_tag, _ = HashTag.objects.get_or_create(name=hashtag)
+            post.hash_tags.add(HashTag.objects.get(name=hashtag))
 
         return post
 
