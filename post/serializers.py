@@ -50,7 +50,7 @@ class PostListSerializer(serializers.ModelSerializer):
         return obj.people_who_liked.count()
 
     def find_hashtags_in_text(self, string):
-        hashtag_pattern = r'#\w+'
+        hashtag_pattern = r'#(\w+)'
         hashtags = re.findall(hashtag_pattern, string)
 
         return hashtags
