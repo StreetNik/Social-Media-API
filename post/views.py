@@ -12,17 +12,23 @@ class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
 
     def get_queryset(self):
+        queryset = Post.objects.all()
+
         filter = self.request.GET.get("filter", "all")
+        hashtag = self.request.GET.get("hashtag", None)
         user = self.request.user
 
         if filter == "following" and user.is_authenticated:
             following_users = user.profile.following.all()
-            return Post.objects.filter(user__in=following_users)
+            queryset = queryset.filter(user__in=following_users)
 
         if filter == "mine":
-            return Post.objects.filter(user=user.id)
+            queryset = queryset.filter(user=user.id)
 
-        return Post.objects.all()
+        if hashtag:
+            queryset = queryset.filter(hash_tags__name__iexact=hashtag)
+
+        return queryset
 
     def get_serializer_class(self):
         if self.action != 'detail':
