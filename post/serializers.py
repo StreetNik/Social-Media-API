@@ -31,6 +31,11 @@ class PostListSerializer(serializers.ModelSerializer):
         required=False,
     )
 
+    time_to_create = serializers.DateTimeField(
+        write_only=True,
+        required=False,
+    )
+
     class Meta:
         model = Post
         fields = [
@@ -43,6 +48,7 @@ class PostListSerializer(serializers.ModelSerializer):
             "created_at",
             "likes_count",
             "hash_tags",
+            "time_to_create"
         ]
         read_only_fields = ["user"]
 
@@ -59,7 +65,10 @@ class PostListSerializer(serializers.ModelSerializer):
         uploaded_images = validated_data.pop("uploaded_images", None)
         user = self.context["request"].user
         validated_data.pop("hash_tags", None)
+        time_to_create = validated_data.pop("time_to_create", None)
+
         post = Post.objects.create(user=user, **validated_data)
+
         hash_tags = self.find_hashtags_in_text(post.content)
 
         if uploaded_images:
@@ -70,6 +79,9 @@ class PostListSerializer(serializers.ModelSerializer):
         for hashtag in hash_tags:
             new_hash_tag, _ = HashTag.objects.get_or_create(name=hashtag)
             post.hash_tags.add(HashTag.objects.get(name=hashtag))
+
+        if time_to_create:
+            Post.objects.filter(pk=post.pk).update(created_at=time_to_create)
 
         return post
 

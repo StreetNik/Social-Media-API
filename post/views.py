@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 
+from django.utils import timezone
+
 from post.models import Post, PostComment
 from post.serializers import PostListSerializer, PostDetailSerializer, CommentSerializer
 
@@ -12,7 +14,7 @@ class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
 
     def get_queryset(self):
-        queryset = Post.objects.all()
+        queryset = Post.objects.filter(created_at__lte=timezone.now())
 
         filter = self.request.GET.get("filter", "all")
         hashtag = self.request.GET.get("hashtag", None)
