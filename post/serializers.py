@@ -52,7 +52,7 @@ class PostListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["user"]
 
-    def get_likes_count(self, obj):
+    def get_likes_count(self, obj) -> int:
         return obj.people_who_liked.count()
 
     def find_hashtags_in_text(self, string):
