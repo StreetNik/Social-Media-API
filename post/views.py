@@ -1,3 +1,4 @@
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -11,6 +12,10 @@ from post.serializers import PostListSerializer, PostDetailSerializer, CommentSe
 
 
 class PostViewSet(ModelViewSet):
+    '''
+        To create or update post with images use Postman. Type for "uploaded_images" field should be file!
+    '''
+
     queryset = Post.objects.all()
 
     def get_queryset(self):
@@ -70,3 +75,21 @@ class PostViewSet(ModelViewSet):
             message = "Post liked successfully."
 
         return Response({"message": message}, status=status.HTTP_200_OK)
+
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "filter",
+                type=str,
+                description="Filter posts by belonging (following, mine or all)"
+            ),
+            OpenApiParameter(
+                "hashtag",
+                type={"type": "list", "items": {"type": "string"}},
+                description="Filter posts by hashtags"
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)

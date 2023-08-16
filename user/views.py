@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from rest_framework import generics, authentication, permissions, status
+from rest_framework import generics, status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -76,6 +77,28 @@ class UsersListView(generics.ListAPIView):
 
         return queryset
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "sex",
+                type=str,
+                description="Filtering by sex, (men or male)"
+            ),
+            OpenApiParameter(
+                "first_name",
+                type=str,
+                description="Filter by first name"
+            ),
+            OpenApiParameter(
+                "last_name",
+                type=str,
+                description="Filter by last name"
+            )
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class UserPrivateProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserDetailPrivateSerializer
@@ -110,10 +133,15 @@ class FollowToggleAPIView(APIView):
 
     def post(self, request, pk):
         user_to_follow = get_object_or_404(Profile, user_id=pk)
-
         user_profile = get_object_or_404(Profile, user=request.user)
 
         user = request.user
+
+        if user == user_to_follow:
+            return Response(
+                {"message": "You cannot follow yourself"}
+            )
+
         if user in user_to_follow.followers.all():
             user_to_follow.followers.remove(user)
             user_to_follow.save()
