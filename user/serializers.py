@@ -63,10 +63,10 @@ class UserListSerializer(serializers.ModelSerializer):
             "sex",
         ]
 
-    def get_followers_count(self, obj):
+    def get_followers_count(self, obj) -> int:
         return obj.profile.get_followers_count()
 
-    def get_following_count(self, obj):
+    def get_following_count(self, obj) -> int:
         return obj.profile.get_following_count()
 
 
@@ -133,7 +133,7 @@ class UserDetailPublicSerializer(serializers.ModelSerializer):
             "is_following",
         ]
 
-    def get_is_following(self, obj):
+    def get_is_following(self, obj) -> bool:
         request = self.context.get("request")
         if request and request.user.is_authenticated:
             return obj.profile.followers.filter(id=request.user.id).exists()
