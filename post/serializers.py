@@ -18,9 +18,7 @@ class HashTagSerializer(serializers.ModelSerializer):
 
 
 class PostListSerializer(serializers.ModelSerializer):
-    likes_count = serializers.SerializerMethodField(
-        method_name="get_likes_count", read_only=True
-    )
+    likes_count = serializers.SerializerMethodField(read_only=True)
     images = PostImageSerializer(many=True, read_only=True)
     hash_tags = HashTagSerializer(many=True, read_only=True)
     uploaded_images = serializers.ListField(
@@ -78,7 +76,7 @@ class PostListSerializer(serializers.ModelSerializer):
 
         for hashtag in hash_tags:
             new_hash_tag, _ = HashTag.objects.get_or_create(name=hashtag)
-            post.hash_tags.add(HashTag.objects.get(name=hashtag))
+            post.hash_tags.add(new_hash_tag)
 
         if time_to_create:
             Post.objects.filter(pk=post.pk).update(created_at=time_to_create)
